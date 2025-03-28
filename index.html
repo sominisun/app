@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>날씨 앱</title>
+    <!-- Weather Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1E88E5;
+            --secondary-color: #5C6BC0;
+            --background-color: #F5F7FA;
+            --card-color: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-light: #9CA3AF;
+            --border-radius: 16px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        /* 상단 헤더 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .location i {
+            margin-right: 8px;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* 메인 날씨 카드 */
+        .main-weather-card {
+            background: linear-gradient(135deg, #5EFCE8 10%, #736EFE 100%);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .weather-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .weather-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .temperature {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .weather-status {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .feels-like {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .weather-icon {
+            font-size: 64px;
+        }
+
+        .weather-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .weather-detail-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 4px 0;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 검색 섹션 */
+        .search-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-color);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: none;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--text-light);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            outline: none;
+            background-color: var(--background-color);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* 시간별 예보 섹션 */
+        .hourly-forecast-section {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .hourly-forecast-section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .hourly-forecast {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 8px;
+        }
+
+        .hourly-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+
+        .hourly-time {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .hourly-temp {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* 대기질 섹션 */
+        .air-quality-section {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .air-quality-section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .air-quality-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .air-quality-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background-color: var(--background-color);
+            border-radius: calc(var(--border-radius) / 2);
+        }
+
+        .air-quality-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .air-quality-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* 주간 예보 섹션 */
+        .weekly-forecast-section {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .weekly-forecast-section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .weekly-forecast {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .weekly-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 8px;
+            background-color: var(--background-color);
+            border-radius: calc(var(--border-radius) / 2);
+        }
+
+        .weekly-day {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .weekly-temp {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 8px;
+        }
+
+        /* 날씨 아이콘 색상 통일 */
+        .hourly-forecast .weather-icon i,
+        .weekly-forecast .weather-icon i {
+            color: #0984e3;
+            font-size: 24px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+
+            .main-weather-card {
+                padding: 20px;
+            }
+
+            .temperature {
+                font-size: 40px;
+            }
+
+            .weather-icon {
+                font-size: 48px;
+            }
+
+            .weekly-forecast {
+                gap: 4px;
+            }
+
+            .weekly-item {
+                padding: 8px 4px;
+            }
+
+            .weekly-day {
+                font-size: 12px;
+            }
+
+            .weekly-temp {
+                font-size: 12px;
+            }
+
+            .weekly-forecast .weather-icon i {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="city-name">도시를 검색하세요</span>
+            </div>
+            <button class="menu-button" onclick="toggleSearch()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <div class="search-section" id="search-section">
+            <input type="text" class="search-input" id="city-input" placeholder="도시 이름을 입력하세요...">
+        </div>
+
+        <div class="main-weather-card">
+            <div class="weather-top">
+                <div class="weather-info">
+                    <div class="temperature" id="temperature">--°C</div>
+                    <div class="weather-status" id="weather-status">날씨 정보를 불러오는 중...</div>
+                    <div class="feels-like" id="feels-like">체감온도: --°C</div>
+                </div>
+                <div class="weather-icon" id="weather-icon">
+                    <i class="wi wi-day-sunny"></i>
+                </div>
+            </div>
+            <div class="weather-details">
+                <div class="weather-detail-item">
+                    <div class="detail-value" id="humidity">--%</div>
+                    <div class="detail-label">습도</div>
+                </div>
+                <div class="weather-detail-item">
+                    <div class="detail-value" id="wind-speed">--m/s</div>
+                    <div class="detail-label">풍속</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="air-quality-section">
+            <h2>대기질</h2>
+            <div class="air-quality-info">
+                <div class="air-quality-item">
+                    <div class="air-quality-value" id="pm10">--</div>
+                    <div class="air-quality-label">미세먼지 (PM10)</div>
+                </div>
+                <div class="air-quality-item">
+                    <div class="air-quality-value" id="pm25">--</div>
+                    <div class="air-quality-label">초미세먼지 (PM2.5)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hourly-forecast-section">
+            <h2>시간별 예보</h2>
+            <div class="hourly-forecast" id="hourly-forecast">
+                <!-- 시간별 예보 항목이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+
+        <div class="weekly-forecast-section">
+            <h2>주간 예보</h2>
+            <div class="weekly-forecast" id="weekly-forecast">
+                <!-- 주간 예보 항목이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 날씨 아이콘 매핑
+        const weatherIcons = {
+            "맑음": "wi-day-sunny",
+            "흐림": "wi-cloudy",
+            "비": "wi-rain",
+            "눈": "wi-snow",
+            "안개": "wi-fog",
+            "천둥번개": "wi-thunderstorm",
+            "흐리고 비": "wi-rain",
+            "구름조금": "wi-day-cloudy",
+            "구름많음": "wi-cloudy",
+            "맑고 화창": "wi-day-sunny",
+            "부분적으로 흐림": "wi-day-cloudy",
+            "가벼운 비": "wi-showers",
+            "보통 비": "wi-rain",
+            "강한 비": "wi-rain",
+            "소나기": "wi-showers",
+            "약한 눈": "wi-snow",
+            "보통 눈": "wi-snow",
+            "강한 눈": "wi-snow",
+            "진눈깨비": "wi-sleet",
+            "우박": "wi-hail",
+            "뇌우": "wi-thunderstorm",
+            "안개": "wi-fog",
+            "연무": "wi-fog",
+            "황사": "wi-dust",
+            "박무": "wi-fog",
+            "연무": "wi-fog"
+        };
+
+        // 검색 섹션 토글
+        function toggleSearch() {
+            const searchSection = document.getElementById('search-section');
+            searchSection.style.display = searchSection.style.display === 'none' ? 'block' : 'none';
+            if (searchSection.style.display === 'block') {
+                document.getElementById('city-input').focus();
+            }
+        }
+
+        // 날씨 정보 가져오기
+        async function getWeather(city) {
+            try {
+                const response = await fetch('/get_weather', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ city: city }),
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || '날씨 정보를 가져오는데 실패했습니다.');
+                }
+
+                if (!data.success) {
+                    throw new Error(data.message || '날씨 정보를 가져오는데 실패했습니다.');
+                }
+
+                updateWeatherUI(data.data);
+                return data.data;
+            } catch (error) {
+                console.error('날씨 정보 요청 중 오류:', error);
+                alert(error.message);
+            }
+        }
+
+        // UI 업데이트
+        function updateWeatherUI(weatherData) {
+            // 도시 이름
+            document.getElementById('city-name').textContent = weatherData.city;
+
+            // 현재 날씨
+            document.getElementById('temperature').textContent = `${weatherData.current.temperature}°C`;
+            document.getElementById('weather-status').textContent = weatherData.current.weather;
+            document.getElementById('feels-like').textContent = `체감온도: ${weatherData.current.feels_like}°C`;
+            
+            // 날씨 아이콘
+            const weatherIcon = document.getElementById('weather-icon');
+            const iconClass = weatherIcons[weatherData.current.weather] || 'wi-day-sunny';
+            weatherIcon.innerHTML = `<i class="wi ${iconClass}"></i>`;
+
+            // 상세 정보
+            document.getElementById('humidity').textContent = `${weatherData.current.humidity}%`;
+            document.getElementById('wind-speed').textContent = `${weatherData.current.wind_speed}m/s`;
+
+            // 대기질 정보
+            document.getElementById('pm10').textContent = weatherData.air_quality_details.pm10;
+            document.getElementById('pm25').textContent = weatherData.air_quality_details.pm25;
+
+            // 시간별 예보
+            const hourlyForecast = document.getElementById('hourly-forecast');
+            hourlyForecast.innerHTML = '';
+            weatherData.hourly.forEach(hour => {
+                const hourlyItem = document.createElement('div');
+                hourlyItem.className = 'hourly-item';
+                hourlyItem.innerHTML = `
+                    <div class="hourly-time">${hour.time}</div>
+                    <div class="weather-icon">
+                        <i class="wi ${weatherIcons[hour.weather] || 'wi-day-sunny'}"></i>
+                    </div>
+                    <div class="hourly-temp">${hour.temp}°C</div>
+                `;
+                hourlyForecast.appendChild(hourlyItem);
+            });
+
+            // 주간 예보
+            const weeklyForecast = document.getElementById('weekly-forecast');
+            weeklyForecast.innerHTML = '';
+            weatherData.forecast.forEach(day => {
+                const weeklyItem = document.createElement('div');
+                weeklyItem.className = 'weekly-item';
+                weeklyItem.innerHTML = `
+                    <div class="weekly-day">${day.day}</div>
+                    <div class="weather-icon">
+                        <i class="wi ${weatherIcons[day.weather] || 'wi-day-sunny'}"></i>
+                    </div>
+                    <div class="weekly-temp">${day.temp}°C</div>
+                `;
+                weeklyForecast.appendChild(weeklyItem);
+            });
+        }
+
+        // 이벤트 리스너
+        document.getElementById('city-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const city = this.value.trim();
+                if (city) {
+                    getWeather(city);
+                    toggleSearch();
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
