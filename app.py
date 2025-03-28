@@ -10,12 +10,14 @@ chatbot = WeatherChatbot()
 # def home():
 #     return render_template('home.html')
 
-# Streamlit 방식으로 변경
-st.title('홈페이지')
+# Streamlit 스타일
+st.title('홈페이지')  # 페이지 제목
+st.write('여기에 내용을 작성하세요')
 
-@streamlit.route('/')
-def index():
-    return streamlit.render('index.html')
+# 다른 Streamlit 컴포넌트 예시
+st.header('섹션 제목')
+st.text('일반 텍스트')
+st.markdown('**마크다운** 지원')
 
 @streamlit.route('/get_weather', methods=['POST'])
 def get_weather():
